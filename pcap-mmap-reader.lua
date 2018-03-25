@@ -177,6 +177,7 @@ local function interrupted(obj)
 	return obj[_interrupted]
 end
 
+local _M = {}
 local mt_index = {
 	close   = close,
 	refresh = refresh,
@@ -184,8 +185,7 @@ local mt_index = {
 	next_packet = next_packet,
 	interrupted = interrupted
 }
-
-local _M = {}
+local mt = { __gc = close, __index = mt_index }
 
 function _M.open(filename)
 	local fd, err = syscall.open(filename, "rdonly")
@@ -204,7 +204,7 @@ function _M.open(filename)
 	-- XXX Check magic, major and minor versions.
 
 	local obj = { addr, fd, global_header_size, 0, st.size, st.size, false }
-	return setmetatable(obj, { __gc = close, __index = mt_index })
+	return setmetatable(obj, mt)
 end
 
 return _M
